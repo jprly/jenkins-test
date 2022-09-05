@@ -1,3 +1,5 @@
+def jenkinsBuildStatus = addEmbeddableBadgeConfiguration(id: "jenkinsTest", subject: "Building With Jenkins")
+
 pipeline {
     agent any
     options {
@@ -23,6 +25,10 @@ pipeline {
                     artifacts: '*.txt',
                     fingerprint: true,
                     onlyIfSuccessful: true
+
+                // set badge success
+                jenkinsBuildStatus.setStatus('passing')
+
             }
         }
     }
