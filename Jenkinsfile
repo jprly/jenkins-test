@@ -2,7 +2,7 @@ def win32BuildBadge = addEmbeddableBadgeConfiguration(id: "win32build", subject:
 
 def RunBuild() {
     echo 'Sleeping instead of running the build'
-    sleep 10
+    sleep 5
 }
 
 pipeline {
