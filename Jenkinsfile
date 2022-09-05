@@ -1,33 +1,28 @@
-def win32BuildBadge = addEmbeddableBadgeConfiguration(id: "win32build", subject: "Windows Build")
-
-def RunBuild() {
-    echo 'Sleeping instead of running the build'
-    sleep 5
-}
-
 pipeline {
     agent any
+    options {
+        buildDiscarder(logRotator(daysToKeepStr: '10', numToKeepStr: '10'))
+        timeout(time: 12, unit: 'HOURS')
+        timestamps()
+    }
     stages {
-        stage('Building') {
+        stage('Requirements') {
             steps {
-                script {
-                    win32BuildBadge.setStatus('running')
-                    try {
-                        RunBuild()
-                        win32BuildBadge.setStatus('passing')
-                    } catch (Exception err) {
-                        win32BuildBadge.setStatus('failing')
+                // this step is required to make sure the script
+                // can be executed directly in a shell
+                sh('chmod +x ./algorithm.sh')
+            }
+        }
+        stage('Build') {
+            steps {
+                // the algorithm script creates a file named report.txt
+                sh('./algorithm.sh')
 
-                        /* Note: If you do not set the color
-                                 the configuration uses the best status-matching color.
-                                 passing -> brightgreen
-                                 failing -> red
-                                 ...
-                        */
-                        win32BuildBadge.setColor('pink')
-                        error 'Build failed'
-                    }
-                }
+                // this step archives the report
+                archiveArtifacts allowEmptyArchive: true,
+                    artifacts: '*.txt',
+                    fingerprint: true,
+                    onlyIfSuccessful: true
             }
         }
     }
