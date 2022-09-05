@@ -1,36 +1,33 @@
-def jenkinsBuildStatus = addEmbeddableBadgeConfiguration(id: "jenkinsTest", subject: "Building With Jenkins")
+def win32BuildBadge = addEmbeddableBadgeConfiguration(id: "win32build", subject: "Windows Build")
+
+def RunBuild() {
+    echo 'Sleeping instead of running the build'
+    sleep 10
+}
 
 pipeline {
     agent any
-    options {
-        buildDiscarder(logRotator(daysToKeepStr: '10', numToKeepStr: '10'))
-        timeout(time: 12, unit: 'HOURS')
-        timestamps()
-    }
     stages {
-        stage('Requirements') {
+        stage('Building') {
             steps {
-                // this step is required to make sure the script
-                // can be executed directly in a shell
-                sh('chmod +x ./algorithm.sh')
-            }
-        }
-        stage('Build') {
-            steps {
-                // the algorithm script creates a file named report.txt
-                sh('./algorithm.sh')
-
-                // this step archives the report
-                archiveArtifacts allowEmptyArchive: true,
-                    artifacts: '*.txt',
-                    fingerprint: true,
-                    onlyIfSuccessful: true
-
-                // set badge success
                 script {
-                jenkinsBuildStatus.setStatus('passing')
-                }
+                    win32BuildBadge.setStatus('running')
+                    try {
+                        RunBuild()
+                        win32BuildBadge.setStatus('passing')
+                    } catch (Exception err) {
+                        win32BuildBadge.setStatus('failing')
 
+                        /* Note: If you do not set the color
+                                 the configuration uses the best status-matching color.
+                                 passing -> brightgreen
+                                 failing -> red
+                                 ...
+                        */
+                        win32BuildBadge.setColor('pink')
+                        error 'Build failed'
+                    }
+                }
             }
         }
     }
