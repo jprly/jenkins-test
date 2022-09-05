@@ -27,7 +27,9 @@ pipeline {
                     onlyIfSuccessful: true
 
                 // set badge success
+                script {
                 jenkinsBuildStatus.setStatus('passing')
+                }
 
             }
         }
